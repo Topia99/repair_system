@@ -11,8 +11,8 @@
 	<groupId>com.jason</groupId>
 	<artifactId>repairapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>Repair Management System</name>
+	<description>Mobile-first web application for managing repair orders, customers, parts inventory, and payments.</description>
 	<url/>
 	<licenses>
 		<license/>

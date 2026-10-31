@@ -11,9 +11,11 @@
 <p class="mt-2">
     今天是 <span th:text="${#temporals.format(today, 'yyyy年M月d日')}">2026年1月1日</span>
 </p>
-<p>未完成工单：<span th:text="${openOrders}">0</span> 张</p>
+<p>未完成工单：<span th:text="${#lists.size(orders)}">0</span> 张</p>
 
-<ul class="mt-4 space-y-2">
+<p th:if="${#lists.isEmpty(orders)}">目前没有工单</p>
+
+<ul th:unless="${#lists.isEmpty(orders)}" class="mt-4 space-y-2">
     <li th:each="o : ${orders}"
         class="bg-white rounded-lg p-3 shadow border"
         th:classappend="${o.overdue} ? 'border-red-500' : 'border-gray-200'">
@@ -25,6 +27,5 @@
     </li>
 </ul>
 
-<p th:if="${#lists.isEmpty(orders)}">目前没有工单</p>
 </body>
 </html>

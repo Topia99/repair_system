@@ -13,7 +13,6 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model){
         model.addAttribute("today", LocalDate.now());
-        model.addAttribute("openOrders", 3);
         model.addAttribute("orders", List.of(
 //                new OrderSummary("王先生", "iPhone 14", "维修中", false),
 //                new OrderSummary("Lisa", "iPhone 13 Pro", "等配件", true),
