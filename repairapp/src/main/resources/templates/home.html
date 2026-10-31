@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>工单系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4">
+<h1 class="text-2xl font-bold">工单系统</h1>
+<p class="mt-2">
+    今天是 <span th:text="${#temporals.format(today, 'yyyy年M月d日')}">2026年1月1日</span>
+</p>
+<p>未完成工单：<span th:text="${openOrders}">0</span> 张</p>
+
+<ul class="mt-4 space-y-2">
+    <li th:each="o : ${orders}"
+        class="bg-white rounded-lg p-3 shadow border"
+        th:classappend="${o.overdue} ? 'border-red-500' : 'border-gray-200'">
+        <div class="font-semibold">
+            <span th:text="${o.customerName}">客户名</span>
+            <span th:if="${o.overdue}" class="text-red-500">已超时</span>
+        </div>
+        <div class="text-gray-600" th:text="|${o.phoneModel} · ${o.status}|">机型 · 状态</div>
+    </li>
+</ul>
+
+<p th:if="${#lists.isEmpty(orders)}">目前没有工单</p>
+</body>
+</html>
