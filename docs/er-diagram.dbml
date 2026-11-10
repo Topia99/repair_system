@@ -1,0 +1,212 @@
+
+// 1. 客户和员工
+Table customers {
+  id integer [primary key]
+  name varchar
+  phone_number varchar
+  wechat_id varchar
+  created_at timestamp
+}
+
+Table employees {
+  id integer [primary key]
+  name varchar
+  phone_number varchar
+  birthday date
+}
+
+
+
+Table brands {
+  id integer [primary key]
+  name varchar [not null, unique]
+}
+
+Table models {
+  id integer [primary key]
+  brand_id integer [not null]
+  name varchar [not null]
+
+  indexes {
+    (brand_id, name) [unique]
+  }
+}
+
+
+Table parts {
+  id integer [primary key]
+  model_id integer [not null]
+  sku varchar [unique, not null]
+  grade_id integer [not null]
+  category_id integer [not null]
+  latest_purchase_price decimal(10,2)
+
+  indexes {
+    (category_id, model_id, grade_id) [unique]
+  }
+}
+
+Table part_grades {
+  id integer [primary key]
+  part_category_id integer [not null]
+  name varchar [not null]
+  active boolean [not null]
+
+  indexes {
+    (id, part_category_id) [unique]
+    (name, part_category_id) [unique]
+  }
+}
+
+Table part_categories {
+  id integer [primary key]
+  name varchar [not null, unique]
+}
+
+Table external_skus {
+  part_id integer [not null]
+  vendor_id integer [not null]
+  external_sku varchar [not null]
+
+  indexes {
+    (vendor_id, external_sku) [pk]
+  }
+}
+
+Table vendors {
+  id integer [primary key]
+  name  varchar [not null, unique]
+  website varchar
+  phone_number varchar
+  email varchar
+}
+
+Ref: models.brand_id > brands.id
+
+Ref: parts.model_id > models.id
+
+Ref: parts.(grade_id, category_id) > part_grades.(id, part_category_id)
+
+Ref: part_grades.part_category_id > part_categories.id
+
+Ref: parts.category_id > part_categories.id
+
+Ref: external_skus.part_id > parts.id
+
+Ref: external_skus.vendor_id > vendors.id
+
+
+Table repair_tickets {
+  id integer [primary key]
+  ticket_number varchar
+  customer_id integer
+  model_id integer
+  status repair_ticket_status
+  device_model varchar
+  problem_description varchar
+  current_assignee_id integer [not null]
+  updated_at datetime
+  created_at datetime
+}
+
+Table repair_ticket_assignments {
+  id integer [primary key]
+  ticket_id integer
+  employee_id integer
+  assigned_at datetime
+  acception_at datetime
+  work_started_at datetime
+  ended_at datetime
+  outcome repair_ticket_assignments_status // 完成 / 交接 / 暂停
+  work_notes varchar  // 已经做了什么
+}
+
+Table repair_ticket_handoffs {
+  id integer [primary key]
+  ticket_id integer
+  assignment_id integer   // 对应本次接单记录
+  from_employee_id integer
+  to_employee_id integer
+  reason_code HandoffReason //无法完成的原因 WAITING_PARTS, INSUFFICIENT_TIME, TECHNICAL_DIFFICULTY, CUSTOMER_PENDING, OTHER
+  reason_detail varchar
+  next_action varchar // 下一位员工需要做什么
+  created_at datetime // 交接时间
+  acknowledged_at datetime // 下一位员工确认接收时间
+}
+
+Table repair_ticket_items {
+  id integer [pk, increment]
+  repair_ticket_id integer
+  service_catalog_id integer
+  description varchar
+  quantity integer
+  standard_price decimal(10,2)
+  quoted_price decimal(10,2)
+  created_at datetime
+}
+
+Table repair_ticket_parts {
+  id integer [pk, increment]
+  ticket_item_id integer
+  part_id integer
+  quantity integer
+  unit_cost decimal(10,2)
+  used_at datetime
+}
+
+Table repair_item {
+  id integer [primary key]
+  name varchar
+  description varchar
+}
+
+Table service_catalog {
+  id integer [primary key]
+  model_id integer [not null]
+  repair_item_id integer [not null]
+  part_id integer [not null]
+  standard_price decimal(10,2)
+  is_active bool
+}
+
+// 6. 最终订单及收款
+Table orders {
+  id integer [pk, increment]
+  order_number varchar [unique, not null]
+  ticket_id integer [not null, unique]
+  customer_id integer [not null]
+  subtotal decimal(10,2)
+  discount_amount decimal(10,2)
+  tax_amount decimal(10,2)
+  total_amount decimal(10,2)
+  status varchar
+  created_at datetime
+  finalized_at datetime
+}
+
+Table order_items {
+  id integer [pk, increment]
+  order_id integer [not null]
+  ticket_item_id integer
+  description varchar
+  quantity integer
+  unit_price decimal(10,2)
+  line_total decimal(10,2)
+}
+
+Table payments {
+  id integer [pk, increment]
+  order_id integer [not null]
+  amount decimal(10,2)
+  payment_method varchar
+  paid_at datetime
+  reference_number varchar
+}
+
+Ref: brands.id <? models.brand_id // one to many
+
+Ref: models.id <? parts.model_id
+
+Ref: repair_tickets.current_assignee_id > employees.id
+
+Ref: orders.ticket_id - repair_tickets.id
